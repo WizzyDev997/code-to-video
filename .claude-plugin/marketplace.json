@@ -1,0 +1,18 @@
+{
+  "name": "code-to-video",
+  "owner": {
+    "name": "WizzyDev997",
+    "url": "https://github.com/WizzyDev997"
+  },
+  "metadata": {
+    "description": "Code to video: product videos made from the product itself."
+  },
+  "plugins": [
+    {
+      "name": "code-to-video",
+      "source": "./",
+      "description": "Turn a codebase or a running web prototype into a short, honest product video: real screens, real numbers, any TTS, 16:9 / 9:16 / 1:1.",
+      "version": "0.2.0"
+    }
+  ]
+}

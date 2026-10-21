@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Crewboard · demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="logo">C</span> Crewboard</div>
+    <span class="badge">Demo data</span>
+    <button id="reset" class="ghost">Reset</button>
+    <button id="balance" class="primary">Balance workload</button>
+  </header>
+  <main>
+    <section class="kpis">
+      <div class="kpi"><div class="k">Overloaded people</div><div class="v" id="k-over">0</div></div>
+      <div class="kpi"><div class="k">Peak load</div><div class="v" id="k-peak">0</div></div>
+      <div class="kpi"><div class="k">Tasks at risk</div><div class="v" id="k-risk">0</div></div>
+      <div class="kpi"><div class="k">Hours planned</div><div class="v" id="k-hours">0</div></div>
+    </section>
+    <section id="people" class="people"></section>
+    <section class="command">
+      <input id="cmd" placeholder="Try: move T7 to Leo · balance · reset" autocomplete="off">
+      <div id="reply" class="reply"></div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

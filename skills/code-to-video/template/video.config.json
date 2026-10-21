@@ -1,0 +1,169 @@
+{
+  "title": "Crewboard demo",
+  "fps": 30,
+  "languages": [
+    "en"
+  ],
+  "formats": [
+    "16:9",
+    "9:16",
+    "1:1"
+  ],
+  "overlap": 0.5,
+  "captions": "auto",
+  "voiceDelay": 0.4,
+  "theme": {
+    "background": "#f5f6f8",
+    "surface": "#ffffff",
+    "ink": "#14171f",
+    "muted": "#6b7280",
+    "line": "#e3e6eb",
+    "accent": "#4f46e5",
+    "accentInk": "#ffffff",
+    "good": "#15803d",
+    "bad": "#c2410c",
+    "grid": true
+  },
+  "fonts": {
+    "sans": "Inter",
+    "mono": "JetBrains Mono"
+  },
+  "voice": {
+    "provider": "deepgram",
+    "takes": 1,
+    "respell": {
+      "Crewboard": "Crew board"
+    },
+    "deepgram": {
+      "model": "aura-2-thalia-en"
+    },
+    "elevenlabs": {
+      "voiceId": "",
+      "modelId": "eleven_multilingual_v2"
+    },
+    "openai": {
+      "model": "gpt-4o-mini-tts",
+      "voice": "alloy"
+    },
+    "command": {
+      "run": "say -o {out}.aiff \"{text}\" && ffmpeg -y -loglevel error -i {out}.aiff {out} && rm {out}.aiff"
+    }
+  },
+  "music": {
+    "file": "",
+    "volume": 0.15
+  },
+  "scenes": [
+    {
+      "id": "hook",
+      "type": "title",
+      "duration": 5,
+      "eyebrow": "Crewboard · demo app",
+      "title": "Two people above capacity.",
+      "accent": "Nobody noticed.",
+      "voice": "Two people on this team are above capacity, and nobody noticed."
+    },
+    {
+      "id": "today",
+      "type": "screen",
+      "duration": 7,
+      "eyebrow": "Today",
+      "title": "Ana and Ben carry most of the week",
+      "image": "captures/before.png",
+      "url": "localhost:4173",
+      "tag": "Demo data",
+      "zoom": {
+        "from": {
+          "x": 0.5,
+          "y": 0.5,
+          "scale": 1
+        },
+        "to": {
+          "x": 0.27,
+          "y": 0.42,
+          "scale": 1.3
+        }
+      },
+      "callouts": [
+        {
+          "x": 0.015,
+          "y": 0.2,
+          "w": 0.485,
+          "h": 0.375,
+          "label": "42 h and 45 h of work",
+          "at": 2.2
+        }
+      ],
+      "voice": "Ana and Ben carry most of the week, while Mia and Leo still have room."
+    },
+    {
+      "id": "balance",
+      "type": "compare",
+      "duration": 9,
+      "eyebrow": "One click",
+      "title": "Balance workload",
+      "before": {
+        "image": "captures/before.png",
+        "label": "Before"
+      },
+      "after": {
+        "image": "captures/after.png",
+        "label": "After"
+      },
+      "url": "localhost:4173",
+      "metrics": [
+        {
+          "label": "Overloaded people",
+          "before": 2,
+          "after": 0
+        },
+        {
+          "label": "Peak load",
+          "before": 113,
+          "after": 78,
+          "unit": "%"
+        },
+        {
+          "label": "Tasks at risk",
+          "before": 3,
+          "after": 2
+        }
+      ],
+      "source": "Computed by the app on its demo data",
+      "voice": "One click spreads the tasks by skill and capacity. Nobody is overloaded, and the peak drops from 113 to 78 percent."
+    },
+    {
+      "id": "command",
+      "type": "typing",
+      "duration": 7,
+      "eyebrow": "Or say what you want",
+      "prompt": "move T7 to Leo",
+      "reply": [
+        "T7 moved to Leo: Leo is now at 48 %."
+      ],
+      "image": "captures/command.png",
+      "url": "localhost:4173",
+      "voice": "Or type what you want. The board checks the skill, moves the task and shows the new load."
+    },
+    {
+      "id": "live",
+      "type": "clip",
+      "duration": 6,
+      "eyebrow": "The real app",
+      "video": "captures/balance-click",
+      "url": "localhost:4173",
+      "caption": "Recorded in the app itself, no mock-up.",
+      "voice": "This is the real app, recorded as it runs."
+    },
+    {
+      "id": "end",
+      "type": "outro",
+      "duration": 5,
+      "title": "Crewboard",
+      "subtitle": "Balance a team's week in one click.",
+      "url": "localhost:4173",
+      "note": "Fictional demo app shipped with code-to-video",
+      "voice": "Crewboard. Balance a team's week in one click."
+    }
+  ]
+}

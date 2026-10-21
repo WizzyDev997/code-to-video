@@ -1,0 +1,32 @@
+{
+  "name": "code-to-video-project",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "node scripts/studio.mjs",
+    "capture": "node scripts/capture.mjs",
+    "voice": "node scripts/voice.mjs",
+    "mix": "node scripts/mix.mjs",
+    "preview": "node scripts/render.mjs --preview",
+    "render": "node scripts/render.mjs",
+    "qa": "node scripts/qa.mjs",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fontsource/dm-sans": "5.2.6",
+    "@fontsource/ibm-plex-mono": "5.2.6",
+    "@fontsource/inter": "5.2.6",
+    "@fontsource/jetbrains-mono": "5.2.6",
+    "@fontsource/montserrat": "5.2.6",
+    "@fontsource/poppins": "5.2.6",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "esbuild": "0.25.10",
+    "playwright": "1.56.1",
+    "typescript": "5.8.3"
+  }
+}

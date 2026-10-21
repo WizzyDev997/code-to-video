@@ -1,0 +1,14 @@
+{
+  "baseUrl": "http://localhost:4173",
+  "viewport": { "width": 1600, "height": 1000 },
+  "deviceScaleFactor": 1.25,
+  "outDir": "public/captures",
+  "shots": [
+    { "name": "before", "path": "/" },
+    { "name": "after", "path": "/", "actions": [{ "click": "#balance" }, { "wait": 700 }] },
+    { "name": "command", "path": "/", "actions": [{ "type": ["#cmd", "move T7 to Leo", 40] }, { "press": "Enter" }, { "wait": 700 }] }
+  ],
+  "clips": [
+    { "name": "balance-click", "path": "/", "settleMs": 900, "actions": [{ "hover": "#balance" }, { "wait": 700 }, { "click": "#balance" }, { "wait": 1800 }] }
+  ]
+}
