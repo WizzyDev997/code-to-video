@@ -1,9 +1,13 @@
 // Voice-over: one audio file per scene and language, from the `voice` line of each scene.
-//   node scripts/voice.mjs [--lang en] [--provider deepgram] [--takes 3] [--only sceneId]
+//   node scripts/voice.mjs [--lang en] [--provider auto] [--takes 3] [--only sceneId] [--check]
 //
-// Any text-to-speech works. Built in: deepgram, elevenlabs, openai, and "command" (any CLI: macOS
-// `say`, piper, espeak, coqui...). Keys come from the environment or a .env file:
-//   DEEPGRAM_API_KEY, ELEVENLABS_API_KEY, OPENAI_API_KEY
+// Default, no account and no key: open-source voices that run on the CPU, downloaded once into
+// .cache/voice-models/ and offline after that. The engine follows the language ("auto"):
+//   English          -> Kokoro-82M  (Apache-2.0, about 90 MB)
+//   any of 30 others -> Supertonic 3 (code MIT, weights OpenRAIL-M, about 400 MB): fr de es it pt nl
+//                       ar bg cs da el et fi hi hr hu id ja ko lt lv pl ro ru sk sl sv tr uk vi
+// Optional: deepgram, elevenlabs, openai (keys DEEPGRAM_API_KEY, ELEVENLABS_API_KEY, OPENAI_API_KEY
+// from the environment or a .env file), and "command" (any CLI: macOS `say`, piper, espeak...).
 //
 // Two lessons learned the hard way, both handled here:
 //  - TTS voices mispronounce product names. `voice.respell` rewrites words for the voice only
@@ -14,6 +18,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { ROOT, args, config, duration, has, loadEnv, mkdirp, run, text, timeline } from './lib.mjs'
+import { SUPERTONIC_LANGS } from './tts/supertonic.mjs'
 
 loadEnv()
 const a = args()
@@ -35,7 +40,35 @@ async function save(res, file) {
   fs.writeFileSync(file, Buffer.from(await res.arrayBuffer()))
 }
 
+// Local engines are loaded once and reused for every line
+const engines = {}
+const toMp3 = (wav, file) => { run('ffmpeg', ['-y', '-loglevel', 'error', '-i', wav, '-codec:a', 'libmp3lame', '-q:a', '2', file]); fs.rmSync(wav, { force: true }) }
+
 const PROVIDERS = {
+  // English: Kokoro-82M through kokoro-js (ONNX on the CPU)
+  async kokoro(s, line, file) {
+    const k = s.kokoro ?? {}
+    if (!engines.kokoro) { const { ensureKokoro } = await import('./fetch-voice-model.mjs'); engines.kokoro = await ensureKokoro(k.dtype ?? 'q8') }
+    const audio = await engines.kokoro.generate(line, { voice: k.voice ?? 'af_heart', speed: k.speed ?? 1 })
+    const wav = file.replace(/\.mp3$/, '.wav')
+    await audio.save(wav)
+    toMp3(wav, file)
+  },
+  // Every other language: Supertonic 3 on ONNX Runtime (CPU)
+  async supertonic(s, line, file, { lang, take }) {
+    const o = s.supertonic ?? {}
+    if (!engines.supertonic) {
+      const { ensureSupertonic } = await import('./fetch-voice-model.mjs')
+      const { loadSupertonic } = await import('./tts/supertonic.mjs')
+      engines.supertonic = await loadSupertonic(await ensureSupertonic())
+    }
+    const e = engines.supertonic
+    const samples = await e.synth(line, { lang: base(lang), voice: o.voice ?? 'F3', steps: o.steps ?? 8, speed: o.speed ?? 1.05, seed: (o.seed ?? 1) + take - 1 })
+    const { writeWav } = await import('./tts/supertonic.mjs')
+    const wav = file.replace(/\.mp3$/, '.wav')
+    writeWav(wav, samples, e.sampleRate)
+    toMp3(wav, file)
+  },
   async deepgram(s, line, file) {
     const key = process.env.DEEPGRAM_API_KEY
     if (!key) throw new Error('DEEPGRAM_API_KEY is not set')
@@ -89,12 +122,26 @@ function transcribe(file, lang) {
   return out
 }
 
+// "en", "en-US", "fr-CH" -> "en", "fr"
+const base = (lang) => lang.toLowerCase().split(/[-_]/)[0]
+
+// "auto": Kokoro for English, Supertonic for the 30 other languages it speaks
+function resolve(provider, lang) {
+  if (provider && provider !== 'auto') return provider
+  const b = base(lang)
+  if (b === 'en') return 'kokoro'
+  if (SUPERTONIC_LANGS.includes(b)) return 'supertonic'
+  throw new Error(`no open-source voice for "${lang}" yet. Available: en (Kokoro) and ${SUPERTONIC_LANGS.filter((l) => l !== 'en').join(', ')} (Supertonic). ` +
+    'Or set voice.provider to deepgram, elevenlabs, openai or command.')
+}
+
 const { items } = timeline(cfg)
 for (const lang of langs) {
   const s = settings(lang)
-  const provider = a.provider ?? s.provider ?? 'command'
+  const provider = resolve(a.provider ?? s.provider ?? 'auto', lang)
   const fn = PROVIDERS[provider]
-  if (!fn) throw new Error(`unknown provider ${provider}: ${Object.keys(PROVIDERS).join(', ')}`)
+  if (!fn) throw new Error(`unknown provider ${provider}: auto, ${Object.keys(PROVIDERS).join(', ')}`)
+  console.log(`${lang}: voice by ${provider}`)
   const dir = path.join(ROOT, 'public', 'voice', lang)
   mkdirp(dir)
   for (const { scene, start, end } of items) {
@@ -105,12 +152,12 @@ for (const lang of langs) {
     const files = []
     for (let k = 1; k <= takes; k++) {
       const f = path.join(dir, `${scene.id}${takes > 1 ? `-t${k}` : ''}.mp3`)
-      await fn(s, spoken, f)
+      await fn(s, spoken, f, { lang, take: k })
       files.push(f)
     }
     let best = files[0]
     if (files.length > 1 && has('whisper')) {
-      const scored = files.map((f) => ({ f, score: similarity(script, transcribe(f, lang)) })).sort((x, y) => y.score - x.score)
+      const scored = files.map((f) => ({ f, score: similarity(script, transcribe(f, base(lang))) })).sort((x, y) => y.score - x.score)
       best = scored[0].f
       console.log(`  ${scene.id}: takes ${scored.map((x) => x.score.toFixed(2)).join(' / ')}`)
     }
@@ -118,7 +165,9 @@ for (const lang of langs) {
     if (best !== final) fs.copyFileSync(best, final)
     const len = duration(final)
     const room = end - start - (scene.voiceDelay ?? cfg.voiceDelay ?? 0.4)
-    console.log(`${lang} ${scene.id}: ${len.toFixed(1)} s${len > room ? `  ⚠ longer than its scene (${room.toFixed(1)} s): shorten the line or the scene grows` : ''}`)
+    // --check: transcribe the kept take and say how close it is to the script (needs the whisper CLI)
+    const check = a.check && has('whisper') ? `  · heard ${(similarity(script, transcribe(final, base(lang))) * 100).toFixed(0)} % of the words` : ''
+    console.log(`${lang} ${scene.id}: ${len.toFixed(1)} s${check}${len > room ? `  ⚠ longer than its scene (${room.toFixed(1)} s): shorten the line or the scene grows` : ''}`)
   }
 }
 console.log('next: node scripts/mix.mjs')

@@ -1,7 +1,7 @@
 # code-to-video
 
 **Turn a codebase or a running web prototype into a short, honest product video.**
-Real screens, real numbers, any text-to-speech, rendered for the web, Reels/Shorts and LinkedIn.
+Real screens, real numbers, an open-source voice-over with no key, rendered for the web, Reels/Shorts and LinkedIn.
 
 `code-to-video` is an [Agent Skill](https://docs.claude.com/en/docs/claude-code/skills) for Claude
 Code. Point it at a repo: it reads the code, runs the app, captures the real screens with
@@ -18,8 +18,8 @@ no video framework, no render service, no license to buy.
 
 ![The preview player](docs/preview-player.jpg)
 
-Example output: [`docs/crewboard-demo.mp4`](docs/crewboard-demo.mp4) (36 s preview, voice by macOS
-`say`), made from the tiny demo app in [`examples/demo-app`](examples/demo-app).
+Example output: [`docs/crewboard-demo.mp4`](docs/crewboard-demo.mp4) (voice by Kokoro, generated
+locally with no key), made from the tiny demo app in [`examples/demo-app`](examples/demo-app).
 
 ## Why
 
@@ -48,7 +48,7 @@ Or copy `skills/code-to-video/` into `~/.claude/skills/` (all your projects) or
 `.claude/skills/` (one project).
 
 **Requirements:** Node 20+, ffmpeg, and a Chromium for Playwright (`npx playwright install
-chromium`). Optional: a TTS key, and the `whisper` CLI to pick the cleanest voice take.
+chromium`). Optional: the `whisper` CLI to check the voice and pick the cleanest take. No TTS key needed.
 
 ## Use
 
@@ -71,14 +71,29 @@ The skill walks through eight steps:
 | 7 · Voice | optional voice-over, mixed at -16 LUFS |
 | 8 · Render + QA | every format and language, checked for duration and loudness |
 
-## Voice-over: any TTS
+## Voice-over with no key
 
-Built in: **Deepgram**, **ElevenLabs**, **OpenAI**, and `command`, which runs any CLI (macOS `say`,
-piper, espeak, Coqui, a local model). Keys come from the environment or a `.env` file:
-`DEEPGRAM_API_KEY`, `ELEVENLABS_API_KEY`, `OPENAI_API_KEY`. Adding another provider is one function
-in `scripts/voice.mjs`. See [references/voice.md](skills/code-to-video/references/voice.md):
-respelling product names for the voice, several takes picked by transcript, lines that fit their
-scene.
+Pick the language; the engine follows. Both run on the CPU of an ordinary laptop, download once
+into `.cache/voice-models/`, then work offline:
+
+| Language | Engine | First download | License |
+|---|---|---|---|
+| English | [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) | about 90 MB | Apache-2.0 |
+| French, German, Spanish, Italian, Portuguese, Dutch and 24 more | [Supertonic 3](https://github.com/supertone-inc/supertonic) | about 400 MB | code MIT, weights OpenRAIL-M |
+
+The 31 languages: en, fr, de, es, it, pt, nl, ar, bg, cs, da, el, et, fi, hi, hr, hu, id, ja, ko,
+lt, lv, pl, ro, ru, sk, sl, sv, tr, uk, vi. Kokoro is used only for English because its Node
+package reads text with English rules; Supertonic reads each language with its own.
+
+Prefer a hosted voice? **Deepgram**, **ElevenLabs** and **OpenAI** are built in (keys from the
+environment or a `.env` file: `DEEPGRAM_API_KEY`, `ELEVENLABS_API_KEY`, `OPENAI_API_KEY`), and
+`command` runs any CLI (macOS `say`, piper, espeak, a local model). Adding another provider is one
+function in `scripts/voice.mjs`. See [references/voice.md](skills/code-to-video/references/voice.md):
+voices, respelling product names per language, numbers the voice reads well, transcript checks,
+lines that fit their scene.
+
+Listen: [English, Kokoro](docs/voice-en-kokoro.mp3) ·
+[French, Supertonic](docs/voice-fr-supertonic.mp3).
 
 ## Try it on the example
 
@@ -91,7 +106,8 @@ node scripts/capture.mjs                           # real screens of the demo ap
 node scripts/studio.mjs                            # preview player on http://localhost:3000/?player=1 (Ctrl+C to stop)
 node scripts/render.mjs --preview --format 16:9    # half-res preview in out/
 node scripts/qa.mjs                                # duration, loudness, contact sheet
-node scripts/voice.mjs --provider command          # optional: voice with macOS say (no key)
+node scripts/voice.mjs                             # optional: English voice-over, no key (Kokoro)
+node scripts/voice.mjs --lang fr                   # optional: French voice-over, no key (Supertonic)
 node scripts/mix.mjs && node scripts/render.mjs    # final, every format
 ```
 
@@ -125,8 +141,11 @@ examples/demo-app/         Crewboard, a fictional team-workload board used for t
 ## Licenses
 
 MIT. The dependencies are open source too: React (MIT), Playwright (Apache-2.0), esbuild (MIT),
-ffmpeg (LGPL/GPL, used as a command-line tool), the bundled fonts (SIL Open Font License). Music and
-voices you add are under their own terms.
+ffmpeg (LGPL/GPL, used as a command-line tool), the bundled fonts (SIL Open Font License),
+ONNX Runtime (MIT), Kokoro-82M and kokoro-js (Apache-2.0). Supertonic 3: sample code MIT (adapted in
+`scripts/tts/supertonic.mjs`, notice kept), weights under OpenRAIL-M, which forbids, among others,
+imitating a real person without consent and passing machine-generated content off as human to
+deceive. Music and voices you add are under their own terms.
 
 ## Contributing
 

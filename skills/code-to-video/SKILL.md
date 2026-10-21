@@ -3,8 +3,9 @@ name: code-to-video
 description: >-
   Turn a codebase or a running web app/prototype into a short, honest product video (about 60 s):
   read the code, run the app, capture real screens and recordings with Playwright, measure real
-  numbers, storyboard with the user, compose with a built-in frame engine, add an optional voice-over with any
-  text-to-speech (Deepgram, ElevenLabs, OpenAI, or a local CLI), render 16:9 / 9:16 / 1:1 and check
+  numbers, storyboard with the user, compose with a built-in frame engine, add an optional voice-over (open-source
+  voices with no key by default: Kokoro for English, Supertonic for 30 other languages; or Deepgram,
+  ElevenLabs, OpenAI, any CLI), render 16:9 / 9:16 / 1:1 and check
   the result. Use when the user asks for a demo video, promo video, explainer, launch clip, or
   "a video of this app / repo / prototype / PR".
 ---
@@ -39,7 +40,8 @@ You never hand-write a video component for a normal job; you only edit `video.co
 6. **Two user gates.** The storyboard (words and scene list) and the low-resolution preview are
    approved by the user before the voice and the final render. Words are cheap to change before
    the render, expensive after.
-7. **Keys stay out of the repo.** TTS keys come from the environment or a git-ignored `.env`.
+7. **Keys stay out of the repo.** The default voices need none. Keys for hosted TTS come from the
+   environment or a git-ignored `.env`.
 
 ## The pipeline
 
@@ -79,11 +81,19 @@ it: a loading spinner, a cookie banner, an error toast or a private name ruins a
 Present the storyboard to the user as a short table: scene, what we see, what the voice says,
 where each number comes from. Wait for approval.
 
-**Voice** (`references/voice.md`). Any TTS works: `deepgram`, `elevenlabs`, `openai` are built in,
-and `command` runs any CLI (macOS `say`, piper, espeak, Coqui...). Write lines to be spoken, not
-read: short sentences, numbers as words when they sound odd. Use `voice.respell` for product names
-the voice mangles, and `--takes 3` when a voice is not deterministic (the script keeps the take
-whose `whisper` transcript is closest to the line). Each line must fit its scene: the script warns
+**Voice** (`references/voice.md`). Ask the user for **the language only**, and show the list of
+languages available without a key: English, French, German, Spanish, Italian, Portuguese, Dutch,
+then Arabic, Bulgarian, Croatian, Czech, Danish, Estonian, Finnish, Greek, Hindi, Hungarian,
+Indonesian, Japanese, Korean, Latvian, Lithuanian, Polish, Romanian, Russian, Slovak, Slovenian,
+Swedish, Turkish, Ukrainian, Vietnamese. Do not ask about engines: `"provider": "auto"` uses
+Kokoro for English and Supertonic for the others, on the CPU, with no account or key (first run
+downloads about 90 MB for English, about 400 MB for the rest, then works offline). Offer Deepgram,
+ElevenLabs, OpenAI or a CLI (`command`) only if the user asks for them or for a language outside
+the list. Write lines to be spoken, not read: short sentences, numbers written the way the voice
+reads them well, and listen to the numbers. Use `voice.respell` for product names the voice
+mangles, per language under `voice.languages.<lang>.respell`. `--check` transcribes each line with
+`whisper` and prints the share of words heard; `--takes 3` keeps the cleanest of three takes. Each
+line must fit its scene, in every language (French runs longer than English): the script warns
 when it does not.
 
 **Render and QA** (`references/render-and-qa.md`). Preview at half resolution first; use

@@ -29,10 +29,20 @@
     "mono": "JetBrains Mono"
   },
   "voice": {
-    "provider": "deepgram",
+    "provider": "auto",
     "takes": 1,
     "respell": {
       "Crewboard": "Crew board"
+    },
+    "kokoro": {
+      "voice": "af_heart",
+      "dtype": "q8",
+      "speed": 1
+    },
+    "supertonic": {
+      "voice": "F3",
+      "steps": 8,
+      "speed": 1.05
     },
     "deepgram": {
       "model": "aura-2-thalia-en"
@@ -47,6 +57,13 @@
     },
     "command": {
       "run": "say -o {out}.aiff \"{text}\" && ffmpeg -y -loglevel error -i {out}.aiff {out} && rm {out}.aiff"
+    },
+    "languages": {
+      "fr": {
+        "respell": {
+          "Crewboard": "Crou-borde"
+        }
+      }
     }
   },
   "music": {
@@ -57,11 +74,14 @@
     {
       "id": "hook",
       "type": "title",
-      "duration": 5,
+      "duration": 6,
       "eyebrow": "Crewboard · demo app",
       "title": "Two people above capacity.",
       "accent": "Nobody noticed.",
-      "voice": "Two people on this team are above capacity, and nobody noticed."
+      "voice": {
+        "en": "Two people on this team are above capacity, and nobody noticed.",
+        "fr": "Deux personnes dépassent leur capacité, et personne ne l'a vu."
+      }
     },
     {
       "id": "today",
@@ -94,12 +114,15 @@
           "at": 2.2
         }
       ],
-      "voice": "Ana and Ben carry most of the week, while Mia and Leo still have room."
+      "voice": {
+        "en": "Ana and Ben carry most of the week, while Mia and Leo still have room.",
+        "fr": "Ana et Ben portent l'essentiel de la semaine, alors que Mia et Leo ont encore de la marge."
+      }
     },
     {
       "id": "balance",
       "type": "compare",
-      "duration": 9,
+      "duration": 11,
       "eyebrow": "One click",
       "title": "Balance workload",
       "before": {
@@ -130,12 +153,15 @@
         }
       ],
       "source": "Computed by the app on its demo data",
-      "voice": "One click spreads the tasks by skill and capacity. Nobody is overloaded, and the peak drops from 113 to 78 percent."
+      "voice": {
+        "en": "One click spreads the tasks by skill and capacity. Nobody is overloaded, and the peak drops from 113 to 78 percent.",
+        "fr": "Un clic répartit les tâches selon compétences et capacité. Plus de surcharge : le pic passe de cent treize à septante-huit pour cent."
+      }
     },
     {
       "id": "command",
       "type": "typing",
-      "duration": 7,
+      "duration": 8,
       "eyebrow": "Or say what you want",
       "prompt": "move T7 to Leo",
       "reply": [
@@ -143,7 +169,10 @@
       ],
       "image": "captures/command.png",
       "url": "localhost:4173",
-      "voice": "Or type what you want. The board checks the skill, moves the task and shows the new load."
+      "voice": {
+        "en": "Or type what you want. The board checks the skill, moves the task and shows the new load.",
+        "fr": "Ou tapez votre demande : le tableau vérifie la compétence et déplace la tâche."
+      }
     },
     {
       "id": "live",
@@ -153,7 +182,10 @@
       "video": "captures/balance-click",
       "url": "localhost:4173",
       "caption": "Recorded in the app itself, no mock-up.",
-      "voice": "This is the real app, recorded as it runs."
+      "voice": {
+        "en": "This is the real app, recorded as it runs.",
+        "fr": "Voici la vraie application, enregistrée pendant qu'elle tourne."
+      }
     },
     {
       "id": "end",
@@ -163,7 +195,10 @@
       "subtitle": "Balance a team's week in one click.",
       "url": "localhost:4173",
       "note": "Fictional demo app shipped with code-to-video",
-      "voice": "Crewboard. Balance a team's week in one click."
+      "voice": {
+        "en": "Crewboard. Balance a team's week in one click.",
+        "fr": "Crewboard. Équilibrez la semaine d'une équipe en un clic."
+      }
     }
   ]
 }

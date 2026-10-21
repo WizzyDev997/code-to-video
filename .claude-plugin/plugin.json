@@ -1,6 +1,6 @@
 {
   "name": "code-to-video",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Turn a codebase or a running web prototype into a short, honest product video: real screens, real numbers, any TTS, 16:9 / 9:16 / 1:1.",
   "author": {
     "name": "WizzyDev997",
